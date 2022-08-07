@@ -1,11 +1,11 @@
+import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
+import Catalog from "../../features/catalog/Catalog";
+import { Product } from "../models/product";
 
 
 function App() { // functional component, a function that return jsx (html a look-alike)
-  const [products, setProducts] = useState([
-    {name: 'product1', price: 100.00},
-    {name: 'product2', price: 200.00}
-  ]);
+  const [products, setProducts] = useState<Product[]>([]); //state
 
   useEffect(()=>{ //1st param: callback function
     fetch('http://localhost:5000/api/products')
@@ -16,20 +16,22 @@ function App() { // functional component, a function that return jsx (html a loo
 
   function addProduct(){
     setProducts(prevState => [...prevState, 
-      {name: 'product'+(prevState.length+1) , price: ((prevState.length*100)+100)}])
+    {
+      id:prevState.length*101,
+      name: 'product'+(prevState.length+1), 
+      price: ((prevState.length*100)+100),
+      brand: 'some brand',
+      pictureUrl: 'http://picsum.photos/'+prevState.length*101
+    }])
   }
 
   return ( 
-    <div className='app'>
-      <h1 style={{color:'blue'}}>Re-store</h1>
-      <ul>
-        {products.map((item, index) =>(
-          <li key={index}>{item.name} - {item.price}</li>
-        ))}
-      </ul>
-      <button onClick={addProduct}>Add Product</button>
+    <>
+      <Typography variant='h1'>Re-Store</Typography>
+      {/* <h1 style={{color:'blue'}}>Re-store</h1> */}
+      <Catalog products={products} addProduct={addProduct} /> 
    
-    </div>
+    </>
   );
 }
 
