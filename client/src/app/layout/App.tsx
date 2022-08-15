@@ -1,36 +1,35 @@
-import Typography from "@mui/material/Typography";
-import { useEffect, useState } from "react";
+import { ThemeProvider } from "@emotion/react";
+import { createTheme } from "@mui/material";
+import CssBaseline from "@mui/material/CssBaseline";
+import { useState } from "react";
 import Catalog from "../../features/catalog/Catalog";
-import { Product } from "../models/product";
+import Header from "./Header";
 
 
 function App() { // functional component, a function that return jsx (html a look-alike)
-  const [products, setProducts] = useState<Product[]>([]); //state
+  const [darkMode, setDarkMode] = useState(false);
+  const paletteType = darkMode ? 'dark':'light'
+  const theme = createTheme({
+    palette: {
+      mode: paletteType,
+      background: {
+        default: paletteType === 'light' ? '#eaeaea':'#121212'
+      }
+    }
+  })
 
-  useEffect(()=>{ //1st param: callback function
-    fetch('http://localhost:5000/api/products')
-      .then(response => response.json())
-      .then(data => setProducts(data))
-  }, [])//2nd param: empty array, if use empty array that means this is only ever going to be called once.
-  //if forget to put the 2nd param, useEffect gonna be call everytime of render or rerender (could be infinite loop)
-
-  function addProduct(){
-    setProducts(prevState => [...prevState, 
-    {
-      id:prevState.length*101,
-      name: 'product'+(prevState.length+1), 
-      price: ((prevState.length*100)+100),
-      brand: 'some brand',
-      pictureUrl: 'http://picsum.photos/'+prevState.length*101
-    }])
+  function handleThemeChange(){
+    setDarkMode(!darkMode);
   }
 
-  return ( 
+  return (
     <>
-      <Typography variant='h1'>Re-Store</Typography>
-      {/* <h1 style={{color:'blue'}}>Re-store</h1> */}
-      <Catalog products={products} addProduct={addProduct} /> 
-   
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Header darkMode={darkMode} handleThemeChange={handleThemeChange}/>
+        {/* <h1 style={{color:'blue'}}>Re-store</h1> */}
+        <Catalog />
+      </ThemeProvider>
     </>
   );
 }
