@@ -51,7 +51,7 @@ namespace API
             app.UseRouting(); //middleware for routing, order is important here, but not in ConfigureServices
             app.UseCors( opt=>
             {
-                opt.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000","http://localhost:3001");
+                opt.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:3000","http://localhost:3001");
             });
             app.UseAuthorization(); //middleware for authorization
 

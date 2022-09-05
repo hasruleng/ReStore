@@ -15,5 +15,7 @@ namespace API.Data
         }
 
         public DbSet<Product> Products { get; set; } //"Products" will be the name of the table that will get created
+
+        public DbSet<Basket> Baskets { get; set; } 
     }
 }
