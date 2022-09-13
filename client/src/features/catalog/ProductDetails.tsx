@@ -1,24 +1,54 @@
-import { Divider, Grid, Table, TableBody, TableCell, TableContainer, TableRow, Typography } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
+import { Divider, Grid, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import agent from "../../app/api/agent";
+import { useStoreContext } from "../../app/context/StoreContext";
 import NotFound from "../../app/errors/NotFound";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import { Product } from '../../app/models/product'
 
 export default function ProductDetails() {
+    const { basket, setBasket, removeItem } = useStoreContext();
     const { id } = useParams<{ id: string }>();
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
+    const [quantity, setQuantity] = useState(0);
+    const [submitting, setSubmitting] = useState(false);
+    const item = basket?.items.find(i => i.productId === product?.id); //ambil basketItem dari productId
 
     useEffect(() => {
+        if (item) setQuantity(item.quantity);
         agent.Catalog.details(parseInt(id))
             .then(response => setProduct(response))
-            .catch(error => console.log(error.response))
+            .catch(error => console.log(error))
             .finally(() => setLoading(false))
-    }, [id]) //id jadi dependency, ga akan diload kecuali idnya berubah
+    }, [id, item]);
 
-    if (loading) return <LoadingComponent message='Loading Product Detail...'/>
+    function handleInputChange(event: any) {
+        if (event.target.value >= 0) {
+            setQuantity(event.target.value);
+        }
+    }
+
+    function handleUpdateCart(){
+        setSubmitting(true);
+        if (!item || quantity > item.quantity){ 
+            const updatedQuantity = item ? quantity - item.quantity : quantity; //variable for updated quantity, if we do have an item, true: nambah selisihnya, kalau ga punya, nambah sebesar nilai quantity yg ada di textfield
+            agent.Basket.addItem(product?.id!, updatedQuantity)
+                .then(basket => setBasket(basket))
+                .catch(error => console.log(error))
+                .finally(()=>setSubmitting(false))
+        } else { // jika itemnya sudah ada di basket atau quantity di textfield lebih kecil dari yang ada di basket, maka reduce quantity
+            const updatedQuantity = item.quantity - quantity;
+            agent.Basket.removeItem(product?.id!, updatedQuantity) //yang ke backend udah bener
+                .then(basket => removeItem(product?.id!, updatedQuantity))
+                .catch(error => console.log(error))
+                .finally(()=>setSubmitting(false))
+        }
+    }
+
+    if (loading) return <LoadingComponent message='Loading Product Detail...' />
 
     // if (!product) return <h3>Product not found</h3>
     if (!product) return <NotFound />
@@ -40,26 +70,52 @@ export default function ProductDetails() {
                             <TableRow>
                                 <TableCell>Name</TableCell>
                                 <TableCell>{product.name}</TableCell>
-                            </TableRow>    
+                            </TableRow>
                             <TableRow>
                                 <TableCell>Description</TableCell>
                                 <TableCell>{product.description}</TableCell>
-                            </TableRow>  
+                            </TableRow>
                             <TableRow>
                                 <TableCell>Type</TableCell>
                                 <TableCell>{product.type}</TableCell>
-                            </TableRow>  
+                            </TableRow>
                             <TableRow>
                                 <TableCell>Brand</TableCell>
                                 <TableCell>{product.brand}</TableCell>
-                            </TableRow>  
+                            </TableRow>
                             <TableRow>
                                 <TableCell>Quantity in stock</TableCell>
                                 <TableCell>{product.quantityInStock}</TableCell>
-                            </TableRow>  
+                            </TableRow>
                         </TableBody>
                     </Table>
                 </TableContainer>
+                <Grid container spacing={6}>
+                    <Grid item xs={6}>
+                        <TextField
+                            onChange={handleInputChange}
+                            variant='outlined'
+                            type='number'
+                            label='Quantity in cart'
+                            fullWidth
+                            value={quantity}
+                        />
+                    </Grid>
+                    <Grid item xs={6}>
+                        <LoadingButton
+                            loading={submitting}
+                            sx={{ height: '55px' }}
+                            color='primary'
+                            size='large'
+                            disabled ={item?.quantity == quantity || !item && quantity ==0} // kalau pake === abis quantitynya diubah, disablednya ga bisa nyala lagi
+                            variant='contained'
+                            fullWidth
+                            onClick={() => handleUpdateCart()} 
+                        >
+                            {item ? 'Update Quantity' : 'Add to Cart'}
+                        </LoadingButton>
+                    </Grid>
+                </Grid>
             </Grid>
         </Grid>
     )
