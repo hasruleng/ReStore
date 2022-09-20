@@ -1,5 +1,5 @@
-export const INCREMENT_COUNTER = "INCREMENT_COUNTER"
-export const DECREMENT_COUNTER = "DECREMENT_COUNTER"
+export const INCREMENT_COUNTER = "INCREMENT_COUNTER" //action types
+export const DECREMENT_COUNTER = "DECREMENT_COUNTER" //action types
 
 export interface CounterState{
     data: number;
@@ -11,14 +11,14 @@ const initialState: CounterState ={
     title: 'YARC (yet another redux counter)'
 }
 
-export function increment(amount =1){
+export function increment(amount =1){ //action creators
     return {
         type: INCREMENT_COUNTER,
         payload: amount
     }
 }
 
-export function decrement(amount =1){
+export function decrement(amount =1){ //action creators
     return {
         type: DECREMENT_COUNTER,
         payload: amount
@@ -29,7 +29,7 @@ export default function counterReducer(state=initialState, action: any){
     switch(action.type){
         case INCREMENT_COUNTER:
             return {
-                ...state,
+                ...state, //creating a copy, not mutating state (Priority A Rules). Tapi kalau pake redux toolkit boleh mutate states krn menggunakan library "Immer".
                 data: state.data + action.payload
             }
             break;
@@ -43,5 +43,4 @@ export default function counterReducer(state=initialState, action: any){
     }
     
     return state;
-
 }

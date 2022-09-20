@@ -19,17 +19,21 @@ import { getCookie } from "../util/util";
 import agent from "../api/agent";
 import LoadingComponent from "./LoadingComponent";
 import CheckoutPage from "../../features/checkout/CheckoutPage";
+import { useAppDispatch } from "../store/configureStore";
+import { setBasket } from "../../features/basket/basketSlice";
 
 
 function App() { // functional component, a function that return jsx (html a look-alike)
-  const { setBasket } = useStoreContext();
+  // const { setBasket } = useStoreContext(); //ini pake react context
+  const dispatch = useAppDispatch(); //ini pake redux toolkit
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const buyerId = getCookie('buyerId');
     if (buyerId) {
       agent.Basket.get()
-        .then(basket => setBasket(basket))
+        // .then(basket => setBasket(basket))
+        .then(basket => dispatch(setBasket(basket)))
         .catch(error => console.log(error))
         .finally(() => setLoading(false));
     } else {

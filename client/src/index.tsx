@@ -6,12 +6,13 @@ import reportWebVitals from './reportWebVitals';
 import { Router } from 'react-router-dom';
 import { createBrowserHistory } from 'history';
 import { StoreProvider } from './app/context/StoreContext';
-import { configureStore } from './app/store/configureStore';
+// import { configureStore } from './app/store/configureStore';
 import { Provider } from 'react-redux';
+import { store } from './app/store/configureStore';
 
 export const history = createBrowserHistory();
 
-const store=configureStore();
+// const store=configureStore();
 console.log(store.getState());
 
 ReactDOM.render(

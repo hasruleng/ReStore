@@ -1,11 +1,15 @@
 import { Button, ButtonGroup, Typography } from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
-import { CounterState, decrement, DECREMENT_COUNTER, increment, INCREMENT_COUNTER } from "./counterReducer";
+import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
+import { decrement, increment } from "./counterSlice";
+// import { useDispatch, useSelector } from "react-redux"; //sebelum pake redux toolkit
+// import { CounterState, decrement, DECREMENT_COUNTER, increment, INCREMENT_COUNTER } from "./counterReducer";
 
 export default function ContactPage() {
-    const dispatch = useDispatch();
+    // const dispatch = useDispatch();
+    //const { data, title } = useSelector((state: CounterState) => state);
+    const dispatch = useAppDispatch();
+    const { data, title } = useAppSelector(state => state.counter);
 
-    const { data, title } = useSelector((state: CounterState) => state);
     return (
         <>
             <Typography variant='h2'>
@@ -15,10 +19,11 @@ export default function ContactPage() {
                 The data is: {data}
             </Typography>
             <ButtonGroup>
-                <Button onClick={() => dispatch(decrement())} variant='contained' color='error'>Decrement</Button>
-                <Button onClick={() => dispatch(increment())} variant='contained' color='primary'>Increment</Button>
+                <Button onClick={() => dispatch(decrement(1))} variant='contained' color='error'>Decrement</Button>
+                <Button onClick={() => dispatch(increment(1))} variant='contained' color='primary'>Increment</Button>
                 <Button onClick={() => dispatch(increment(5))} variant='contained' color='secondary'>Increment by 5</Button>
             </ButtonGroup>
         </>
+
     )
 }
