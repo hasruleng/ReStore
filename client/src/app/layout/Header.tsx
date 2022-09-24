@@ -2,6 +2,7 @@ import { ShoppingCart } from "@mui/icons-material";
 import { AppBar, Badge, Box, IconButton, List, ListItem, Switch, Toolbar, Typography } from "@mui/material";
 import { Link, NavLink } from "react-router-dom";
 import { useStoreContext } from "../context/StoreContext";
+import { useAppSelector } from "../store/configureStore";
 import { totalQuantity } from "../util/util";
 
 interface Props {
@@ -22,7 +23,8 @@ const rightLinks = [
 
 export default function Header({ darkMode, handleThemeChange }: Props) {
     
-   const {basket} = useStoreContext();
+//    const {basket} = useStoreContext();//react context
+   const {basket} = useAppSelector(state=>state.basket); //sblmnya di App udah pake redux, abis ganti dari yg atas ke ini langsung muncul basket counter
    const itemCount = totalQuantity(basket); //? berfungsi sebagai pengaman kalau basketnya null
 
     return (

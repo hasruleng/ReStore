@@ -3,18 +3,21 @@ import { Divider, Grid, Table, TableBody, TableCell, TableContainer, TableRow, T
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import agent from "../../app/api/agent";
-import { useStoreContext } from "../../app/context/StoreContext";
+// import { useStoreContext } from "../../app/context/StoreContext";
 import NotFound from "../../app/errors/NotFound";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import { Product } from '../../app/models/product'
+import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
+import { addBasketItemAsync, removeBasketItemAsync } from "../basket/basketSlice";
 
 export default function ProductDetails() {
-    const { basket, setBasket, removeItem } = useStoreContext();
+    // const { basket, setBasket, removeItem } = useStoreContext();
+    const {basket, status} = useAppSelector(state => state.basket);
+    const dispatch = useAppDispatch();
     const { id } = useParams<{ id: string }>();
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState(0);
-    const [submitting, setSubmitting] = useState(false);
     const item = basket?.items.find(i => i.productId === product?.id); //ambil basketItem dari productId
 
     useEffect(() => {
@@ -32,19 +35,12 @@ export default function ProductDetails() {
     }
 
     function handleUpdateCart(){
-        setSubmitting(true);
         if (!item || quantity > item.quantity){ 
             const updatedQuantity = item ? quantity - item.quantity : quantity; //variable for updated quantity, if we do have an item, true: nambah selisihnya, kalau ga punya, nambah sebesar nilai quantity yg ada di textfield
-            agent.Basket.addItem(product?.id!, updatedQuantity)
-                .then(basket => setBasket(basket))
-                .catch(error => console.log(error))
-                .finally(()=>setSubmitting(false))
+            dispatch(addBasketItemAsync({productId: product?.id!, quantity: updatedQuantity}))            
         } else { // jika itemnya sudah ada di basket atau quantity di textfield lebih kecil dari yang ada di basket, maka reduce quantity
             const updatedQuantity = item.quantity - quantity;
-            agent.Basket.removeItem(product?.id!, updatedQuantity) //yang ke backend udah bener
-                .then(basket => removeItem(product?.id!, updatedQuantity))
-                .catch(error => console.log(error))
-                .finally(()=>setSubmitting(false))
+            dispatch(removeBasketItemAsync({productId: product?.id!, quantity: updatedQuantity}))         
         }
     }
 
@@ -103,11 +99,11 @@ export default function ProductDetails() {
                     </Grid>
                     <Grid item xs={6}>
                         <LoadingButton
-                            loading={submitting}
+                            loading={status.includes('pendingRemoveItem'+item?.productId)}
                             sx={{ height: '55px' }}
                             color='primary'
                             size='large'
-                            disabled ={item?.quantity == quantity || !item && quantity ==0} // kalau pake === abis quantitynya diubah, disablednya ga bisa nyala lagi
+                            disabled ={item?.quantity === quantity || (!item && quantity ===0)} // kalau pake === abis quantitynya diubah, disablednya ga bisa nyala lagi
                             variant='contained'
                             fullWidth
                             onClick={() => handleUpdateCart()} 

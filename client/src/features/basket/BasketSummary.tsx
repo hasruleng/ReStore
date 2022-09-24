@@ -7,7 +7,7 @@ interface Props {
     basket: Basket;
 }
 
-export default function BasketSummary({ basket }: Props) {
+export default function BasketSummary({ basket }: Props) { //ini gua pake cara passing parameters, pantesan ga ada storeContext kayak di contoh, jadi ga pake redux toolkit deh
     var subtotal = 0;
     var deliveryFee = 0;
 
