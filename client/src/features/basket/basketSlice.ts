@@ -23,16 +23,17 @@ export const addBasketItemAsync = createAsyncThunk<Basket, { productId: number, 
     }
 );
 
-export const removeBasketItemAsync = createAsyncThunk<void, { productId: number, quantity?: number }>(
+export const removeBasketItemAsync = createAsyncThunk<void, //when we do call this method, then we're going to have our name property available inside the metadata 
+{ productId: number, quantity: number, name?:string }>( 
     'basket/removeBasketItemAysnc',
-    async ({ productId, quantity = 1 }) => { //quantity dikasih default value 1
+    async ({ productId, quantity  }) => { //quantity dikasih default value 1
         try {
             await agent.Basket.removeItem(productId, quantity);
         } catch (error) {
             console.log(error);
         }
     }
-)
+);
 
 export const basketSlice = createSlice({
     name: 'basket',
@@ -48,17 +49,24 @@ export const basketSlice = createSlice({
             state.status = 'pendingAddItem' + action.meta.arg.productId;
         });
         builder.addCase(addBasketItemAsync.fulfilled, (state, action) => {
+            
+            console.log(action.payload);
             state.basket = action.payload;
             state.status = 'idle';
         });
         builder.addCase(addBasketItemAsync.rejected, (state, action) => {
             state.status = 'idle';
         });
+        builder.addCase(removeBasketItemAsync.pending, (state, action) => { //tanda tanya (?) artinya opsional
+            state.status = 'pendingRemoveItem' + action.meta.arg.productId+action.meta.arg.name;
+        });
         builder.addCase(removeBasketItemAsync.fulfilled, (state, action) => {
+            // console.log(action.payload); //aneh action.payloadnya bisa beda dengan yang ada di addBasket
             const { productId, quantity } = action.meta.arg;
-            const itemIndex = state.basket?.items.findIndex(i => i.productId);
-            if (itemIndex === -1 || itemIndex === undefined) return;
-            state.basket!.items[itemIndex].quantity -= quantity!;
+            const itemIndex = state.basket?.items.findIndex(i=> i.productId === productId); //itemIndex-nya basket bermasalah
+            console.log("produk yang dihapus "+productId+" | itemIndex: "+itemIndex);
+            if (itemIndex === -1 || itemIndex === undefined) return; 
+            state.basket!.items[itemIndex].quantity -= quantity; //mengurangi quantity sebanyak 1. quantity bisa undefined krn ga ada kirim dari action.meta.arg (stlh dicek di redux browser toolkit)
             if (state.basket?.items[itemIndex].quantity === 0)
                 state.basket.items.splice(itemIndex, 1);
             state.status = 'idle';

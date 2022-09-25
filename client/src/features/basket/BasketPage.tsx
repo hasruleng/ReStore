@@ -44,8 +44,8 @@ export default function BasketPage() {
                             <TableCell align="right">${(item.price / 100).toFixed(2)}</TableCell>
                             <TableCell align="center">
                                 <LoadingButton
-                                    loading={status.includes('pendingRemoveItem'+item.productId)} //ini cuma true | false tapi pake trik logika biar ga cuma ada satu status untuk satu halaman
-                                    onClick={() => dispatch(removeBasketItemAsync({productId: item.productId}))}
+                                    loading={status==='pendingRemoveItem'+item.productId+'rem'} //ini cuma true | false tapi pake trik logika biar ga cuma ada satu status untuk satu halaman
+                                    onClick={() => dispatch(removeBasketItemAsync({productId: item.productId, quantity: 1, name: 'rem'}))}
                                     color='secondary'>
                                     <Remove />
                                 </LoadingButton>
@@ -60,20 +60,15 @@ export default function BasketPage() {
                             <TableCell align="right">${(item.price * item.quantity / 100).toFixed(2)}</TableCell>
                             <TableCell align="right">
                                 <LoadingButton
-                                    loading={status.includes('pendingRemoveItem'+item.productId)}
+                                    loading={status==='pendingRemoveItem'+item.productId+'del'}
                                     color='error'
-                                    onClick={() => dispatch(removeBasketItemAsync({productId: item.productId, quantity: item.quantity}))}>
+                                    onClick={() => dispatch(removeBasketItemAsync({
+                                        productId: item.productId, quantity: item.quantity, name: 'del'}))}>
                                     <Delete />
                                 </LoadingButton>
                             </TableCell>
                         </TableRow>
                     ))}
-                    {/* <TableRow>
-                        <TableCell colSpan={2}>&nbsp;</TableCell>
-                        <TableCell colSpan={3} align="right">
-                            <BasketSummary />
-                        </TableCell>
-                    </TableRow> */}
                 </TableBody>
             </Table>
         </TableContainer>
