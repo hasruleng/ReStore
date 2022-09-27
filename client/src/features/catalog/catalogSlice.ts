@@ -2,6 +2,7 @@ import { createAsyncThunk, createEntityAdapter, createSlice } from "@reduxjs/too
 import { Bounce } from "react-toastify";
 import agent from "../../app/api/agent";
 import { Product } from "../../app/models/product";
+import { RootState } from "../../app/store/configureStore";
 
 const productsAdapter = createEntityAdapter<Product>();
 
@@ -10,6 +11,17 @@ export const fetchProductsAsync = createAsyncThunk<Product[]>(
     async () => {
         try {
             return await agent.Catalog.list();
+        }catch (error){
+            console.log(error);
+        }
+    }
+)
+
+export const fetchProductAsync = createAsyncThunk<Product, number>(//tipe Product dan number
+    'catalog/fetchProductAsync',
+    async (productId) => {
+        try {
+            return await agent.Catalog.details(productId);
         }catch (error){
             console.log(error);
         }
@@ -36,6 +48,15 @@ export const catalogSlice = createSlice ({
         });
         builder.addCase(fetchProductsAsync.rejected, (state)=>{            
             state.status='idle';
+        });
+        builder.addCase(fetchProductAsync.fulfilled, (state, action)=>{
+            productsAdapter.upsertOne(state, action.payload);//the goal of this is not to use the async method to go and fetch the product from the API unless we actually need to.
+            state.status='idle';
+        });
+        builder.addCase(fetchProductAsync.rejected, (state)=>{
+            state.status='idle';
         })
     })//so that we can do something with the products when we get them back
 })
+
+export const productSelectors = productsAdapter.getSelectors((state: RootState) => state.catalog);

@@ -9,12 +9,10 @@ import { StoreProvider } from './app/context/StoreContext';
 // import { configureStore } from './app/store/configureStore';
 import { Provider } from 'react-redux';
 import { store } from './app/store/configureStore';
-import { fetchProductsAsync } from './features/catalog/catalogSlice';
 
 export const history = createBrowserHistory();
-store.dispatch(fetchProductsAsync());//temporary: to see the effectivenes of redux catalogSlice
+// store.dispatch(fetchProductsAsync());//temporary: to see the effectivenes of redux catalogSlice
 
-// const store=configureStore();
 console.log(store.getState());
 
 ReactDOM.render(

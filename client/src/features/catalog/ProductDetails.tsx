@@ -2,31 +2,28 @@ import { LoadingButton } from "@mui/lab";
 import { Divider, Grid, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import agent from "../../app/api/agent";
 // import { useStoreContext } from "../../app/context/StoreContext";
 import NotFound from "../../app/errors/NotFound";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import { Product } from '../../app/models/product'
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 import { addBasketItemAsync, removeBasketItemAsync } from "../basket/basketSlice";
+import { fetchProductAsync, productSelectors } from "./catalogSlice";
 
 export default function ProductDetails() {
     // const { basket, setBasket, removeItem } = useStoreContext();
     const {basket, status} = useAppSelector(state => state.basket);
     const dispatch = useAppDispatch();
     const { id } = useParams<{ id: string }>();
-    const [product, setProduct] = useState<Product | null>(null);
-    const [loading, setLoading] = useState(true);
+    const product = useAppSelector(state => productSelectors.selectById(state,id)); //fetching a single product using entity adapter (so it doesn't need to load from API)
+    const {status: productStatus} = useAppSelector(state => state.catalog);
     const [quantity, setQuantity] = useState(0);
     const item = basket?.items.find(i => i.productId === product?.id); //ambil basketItem dari productId
 
     useEffect(() => {
         if (item) setQuantity(item.quantity);
-        agent.Catalog.details(parseInt(id))
-            .then(response => setProduct(response))
-            .catch(error => console.log(error))
-            .finally(() => setLoading(false))
-    }, [id, item]);
+       if(!product) dispatch(fetchProductAsync(parseInt(id)));
+    }, [id, item, dispatch, product]);
 
     function handleInputChange(event: any) {
         if (event.target.value >= 0) {
@@ -44,7 +41,7 @@ export default function ProductDetails() {
         }
     }
 
-    if (loading) return <LoadingComponent message='Loading Product Detail...' />
+    if (productStatus.includes('pending')) return <LoadingComponent message='Loading Product Detail...' />
 
     // if (!product) return <h3>Product not found</h3>
     if (!product) return <NotFound />
