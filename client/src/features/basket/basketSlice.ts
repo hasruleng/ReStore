@@ -14,11 +14,11 @@ const initialState: BasketState = {
 
 export const addBasketItemAsync = createAsyncThunk<Basket, { productId: number, quantity?: number }>( //quantity pake ? jadi optional
     'basket/addBasketItemAsync',
-    async ({ productId, quantity = 1 }) => { //quantity dikasih default value 1
+    async ({ productId, quantity = 1 }, thunkAPI) => { //quantity dikasih default value 1
         try {
             return await agent.Basket.addItem(productId, quantity);
-        } catch (error) {
-            console.log(error);
+        } catch (error: any) {
+            return thunkAPI.rejectWithValue({error: error.data});
         }
     }
 );
@@ -26,11 +26,11 @@ export const addBasketItemAsync = createAsyncThunk<Basket, { productId: number, 
 export const removeBasketItemAsync = createAsyncThunk<void, //when we do call this method, then we're going to have our name property available inside the metadata 
 { productId: number, quantity: number, name?:string }>( 
     'basket/removeBasketItemAysnc',
-    async ({ productId, quantity  }) => { //quantity dikasih default value 1
+    async ({ productId, quantity  }, thunkAPI) => { //quantity dikasih default value 1
         try {
             await agent.Basket.removeItem(productId, quantity);
-        } catch (error) {
-            console.log(error);
+        } catch (error: any) {
+            return thunkAPI.rejectWithValue({error: error.data});
         }
     }
 );
@@ -55,6 +55,7 @@ export const basketSlice = createSlice({
             state.status = 'idle';
         });
         builder.addCase(addBasketItemAsync.rejected, (state, action) => {
+            console.log(action);
             state.status = 'idle';
         });
         builder.addCase(removeBasketItemAsync.pending, (state, action) => { //tanda tanya (?) artinya opsional
@@ -71,7 +72,8 @@ export const basketSlice = createSlice({
                 state.basket.items.splice(itemIndex, 1);
             state.status = 'idle';
         });
-        builder.addCase(removeBasketItemAsync.rejected, (state) => {
+        builder.addCase(removeBasketItemAsync.rejected, (state, action) => {
+            console.log(action);
             state.status = 'idle';
         });
     })
