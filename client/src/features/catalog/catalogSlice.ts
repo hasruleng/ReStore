@@ -8,22 +8,22 @@ const productsAdapter = createEntityAdapter<Product>();
 
 export const fetchProductsAsync = createAsyncThunk<Product[]>(
     'catalog/fetchProductsAsync',
-    async () => {
+    async (_, thunkAPI ) => { // underscore (_) as non-existent argument or void
         try {
             return await agent.Catalog.list();
-        }catch (error){
-            console.log(error);
+        }catch (error: any){
+            return thunkAPI.rejectWithValue({error: error.data});
         }
     }
 )
-
+//AsyncThunk => Outer Function: if it goes to inner block, it thinks that it has been fulfilled
 export const fetchProductAsync = createAsyncThunk<Product, number>(//tipe Product dan number
     'catalog/fetchProductAsync',
-    async (productId) => {
+    async (productId, thunkAPI) => { //Inner Function
         try {
             return await agent.Catalog.details(productId);
-        }catch (error){
-            console.log(error);
+        }catch (error: any){ //sebelum ditambahin any ada pesan error di bagian error.data
+            return thunkAPI.rejectWithValue({error: error.data}); //jadi kalau error (produknya null), masuknya ke reject, bukan lagi ke fulfilled
         }
     }
 )
@@ -46,14 +46,17 @@ export const catalogSlice = createSlice ({
             state.status='idle';
             state.productsLoaded=true;
         });
-        builder.addCase(fetchProductsAsync.rejected, (state)=>{            
+        builder.addCase(fetchProductsAsync.rejected, (state, action)=>{            
+            console.log(action);
             state.status='idle';
         });
         builder.addCase(fetchProductAsync.fulfilled, (state, action)=>{
             productsAdapter.upsertOne(state, action.payload);//the goal of this is not to use the async method to go and fetch the product from the API unless we actually need to.
+            //we're in the case where it says fulfilled=>our request was successful and we got passed into the case is now trying to insert a product into our products entities.
             state.status='idle';
         });
-        builder.addCase(fetchProductAsync.rejected, (state)=>{
+        builder.addCase(fetchProductAsync.rejected, (state,action)=>{
+            console.log(action);
             state.status='idle';
         })
     })//so that we can do something with the products when we get them back

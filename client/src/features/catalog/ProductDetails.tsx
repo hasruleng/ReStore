@@ -96,7 +96,7 @@ export default function ProductDetails() {
                     </Grid>
                     <Grid item xs={6}>
                         <LoadingButton
-                            loading={status.includes('pendingRemoveItem'+item?.productId)}
+                            loading={status.includes('pending')}
                             sx={{ height: '55px' }}
                             color='primary'
                             size='large'
