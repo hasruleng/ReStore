@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using API.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,14 +26,11 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Product>>> GetProducts(string orderBy)
         {
-            var query = _context.Products.AsQueryable();
-            
-            query = orderBy switch
-            {
-                "price" => query.OrderBy(p => p.Price),
-                "priceDesc" => query.OrderByDescending(p => p.Price),
-                _ => query.OrderBy(p => p.Name)
-            };
+            var query = _context.Products
+            .Sort(orderBy)
+            .AsQueryable();
+        
+
             return await query.ToListAsync();
         }
 
