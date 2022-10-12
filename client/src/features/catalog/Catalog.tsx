@@ -1,5 +1,6 @@
 import { Box, Checkbox, FormControlLabel, Grid, Pagination, Paper, Typography } from "@mui/material";
 import { useEffect } from "react";
+import CheckboxButtons from "../../app/components/CheckboxButtons";
 import RadioButtonGroup from "../../app/components/RadioButtonGroup";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
@@ -36,29 +37,33 @@ export default function Catalog() {
                     <ProductSearch />
                 </Paper>
                 <Paper sx={{ mb: 2, p: 2 }}>
-                    <RadioButtonGroup 
+                    <RadioButtonGroup
                         selectedValue={productParams.orderBy}
                         options={sortOptions}
-                        onChange={(e) => dispatch(setProductParams({orderBy: e.target.value}))}
-        
+                        onChange={(e) => dispatch(setProductParams({ orderBy: e.target.value }))}
                     />
                 </Paper>
                 <Paper sx={{ mb: 2, p: 2 }}>
-                    {brands.map(brand => (
-                        <FormControlLabel control={<Checkbox />} label={brand} key={brand} />
-                    ))}
+                    <CheckboxButtons
+                        items={brands}
+                        checked={productParams.brands}
+                        onChange={(items: string[]) => dispatch(setProductParams({ brands: items }))}
+
+                    />
                 </Paper>
                 <Paper sx={{ mb: 2, p: 2 }}>
-                    {types.map(type => (
-                        <FormControlLabel control={<Checkbox />} label={type} key={type} />
-                    ))}
+                    <CheckboxButtons
+                        items={types}
+                        checked={productParams.types}
+                        onChange={(items: string[]) => dispatch(setProductParams({ types: items }))}
+                    />
                 </Paper>
             </Grid>
             <Grid item xs={9}>
                 <ProductList products={products} />
             </Grid>
             <Grid item xs={3} />
-            <Grid item xs={9} sx={{mb: 2}}>
+            <Grid item xs={9} sx={{ mb: 2 }}>
                 <Box display='flex' justifyContent='space-between' alignItems='center'>
                     <Typography>
                         Displaying 1-6 of 20 items
