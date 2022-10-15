@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 import { history } from "../.."
+import { PaginatedResponse } from "../models/pagination";
 
 const sleep = () => new Promise(resolve => setTimeout(resolve, 500)); //sleep function is returning the promise
 
@@ -11,6 +12,12 @@ const responseBody = (response: AxiosResponse) => response.data;
 
 axios.interceptors.response.use(async response => {
     await sleep();
+    const pagination = response.headers['pagination']; //axios cuma nerima header dengan lower case
+    if (pagination) { //sempat ga bisa dpt response.headers karena kurang pasang CORS / Access-Control-Expose-Headers
+        response.data = new PaginatedResponse(response.data, JSON.parse(pagination));
+        // console.log(response);
+        return response;
+    }
     return response;
 }, (error: AxiosError) => {
     // console.log('caught by interceptor');
@@ -44,12 +51,8 @@ axios.interceptors.response.use(async response => {
     return Promise.reject(error.response);
 })
 
-// function responseBodyFn(response: AxiosResponse) {    // sama dengan arrow function yang ada di atas
-//     return response.data;
-// }
-
 const requests = {
-    get: (url: string, params?:URLSearchParams) => axios.get(url, {params}).then(responseBody),
+    get: (url: string, params?: URLSearchParams) => axios.get(url, { params }).then(responseBody),
     post: (url: string, body: {}) => axios.post(url).then(responseBody),
     put: (url: string, body: {}) => axios.put(url).then(responseBody),
     delete: (url: string) => axios.delete(url).then(responseBody),
@@ -71,8 +74,8 @@ const TestErrors = {
 
 const Basket = {
     get: () => requests.get('basket'),
-    addItem: (productId: number, quantity =1) => requests.post(`basket?productId=${productId}&quantity=${quantity}`,{}),
-    removeItem: (productId: number, quantity =1) => requests.delete(`basket?productId=${productId}&quantity=${quantity}`)
+    addItem: (productId: number, quantity = 1) => requests.post(`basket?productId=${productId}&quantity=${quantity}`, {}),
+    removeItem: (productId: number, quantity = 1) => requests.delete(`basket?productId=${productId}&quantity=${quantity}`)
 }
 
 const agent = {

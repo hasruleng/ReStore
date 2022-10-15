@@ -13,7 +13,7 @@ namespace API.Extensions
         public static void AddPaginationHeader(this HttpResponse response, MetaData metaData){ //fungsinya cuma buat reformat Json Pagination ke CamelCase
             var options = new JsonSerializerOptions{PropertyNamingPolicy = JsonNamingPolicy.CamelCase};
             response.Headers.Add("Pagination", JsonSerializer.Serialize(metaData, options));
-            // response.Headers.Add("Access-Control-Expose-Headers","Pagination"); //settingan CORS agar klien bisa baca header
+            response.Headers.Add("Access-Control-Expose-Headers", "Pagination"); //settingan CORS agar FE bisa baca response.headers, bukan cuma response.data
         }
     }
 }

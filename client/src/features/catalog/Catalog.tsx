@@ -1,5 +1,6 @@
-import { Box, Checkbox, FormControlLabel, Grid, Pagination, Paper, Typography } from "@mui/material";
+import { Grid, Paper } from "@mui/material";
 import { useEffect } from "react";
+import AppPagination from "../../app/components/AppPagination";
 import CheckboxButtons from "../../app/components/CheckboxButtons";
 import RadioButtonGroup from "../../app/components/RadioButtonGroup";
 import LoadingComponent from "../../app/layout/LoadingComponent";
@@ -16,7 +17,7 @@ const sortOptions = [
 
 export default function Catalog() {
     const products = useAppSelector(productSelectors.selectAll);
-    const { productsLoaded, status, filtersLoaded, brands, types, productParams } = useAppSelector(state => state.catalog); //status: 'idle' | 'loading' | 'succeeded' | 'failed'
+    const { productsLoaded, status, filtersLoaded, brands, types, productParams, metaData } = useAppSelector(state => state.catalog); //status: 'idle' | 'loading' | 'succeeded' | 'failed'
     const dispatch = useAppDispatch();
 
     useEffect(() => { //1st param: callback function
@@ -28,7 +29,7 @@ export default function Catalog() {
     }, [filtersLoaded, dispatch])//2nd param: Dependency injector. if using empty array that means this is only ever going to be called once.
     //if forget to put the 2nd param, useEffect gonna be call everytime of render or rerender (could be infinite loop)
 
-    if (status.includes('pending')) return <LoadingComponent message='Loading Products...' />
+    if (status.includes('pending') || !metaData) return <LoadingComponent message='Loading Products...' />
 
     return (
         <Grid container columnSpacing={4}>
@@ -64,17 +65,10 @@ export default function Catalog() {
             </Grid>
             <Grid item xs={3} />
             <Grid item xs={9} sx={{ mb: 2 }}>
-                <Box display='flex' justifyContent='space-between' alignItems='center'>
-                    <Typography>
-                        Displaying 1-6 of 20 items
-                    </Typography>
-                    <Pagination
-                        color='secondary'
-                        size='large'
-                        count={10}
-                        page={2}
-                    />
-                </Box>
+                <AppPagination 
+                    metaData = {metaData}
+                    onPageChange = {(page: number) => dispatch(setProductParams({pageNumber: page}))}
+                />
             </Grid>
         </Grid>
 
