@@ -22,8 +22,8 @@ function getAxiosParams(productParams: ProductParams){
     params.append('pageSize', productParams.pageSize.toString());
     params.append('orderBy', productParams.orderBy);
     if (productParams.searchTerm) params.append('searchTerm', productParams.searchTerm);
-    if (productParams.brands) params.append('brands', productParams.brands.toString());
-    if (productParams.types) params.append('types', productParams.types.toString());
+    if (productParams.brands.length>0) params.append('brands', productParams.brands.toString());
+    if (productParams.types.length>0) params.append('types', productParams.types.toString());
     return params;
 }
 
@@ -67,7 +67,9 @@ function initParams() { //productParams yang default
     return {
         pageNumber: 1,
         pageSize: 6,
-        orderBy: 'name'
+        orderBy: 'name',
+        brands: [],
+        types: []
     }
 }
 
@@ -86,7 +88,11 @@ export const catalogSlice = createSlice({
     reducers: {
         setProductParams: (state, action)=> {
             state.productsLoaded=false; //will trigger useEffect in catalog to load Product's API
-            state.productParams = {...state.productParams, ...action.payload} //... titik 3: spread operator=> allows us to quickly copy all or part of an existing array or object into another array or object
+            state.productParams = {...state.productParams, ...action.payload, pageNumber:1} //... titik 3: spread operator=> allows us to quickly copy all or part of an existing array or object into another array or object
+        },
+        setPageNumber: (state, action)=> {
+            state.productsLoaded=false; //will trigger useEffect in catalog to load Product's API
+            state.productParams = {...state.productParams, ...action.payload} 
         },
         setMetaData: (state, action) => {
             state.metaData = action.payload;
@@ -136,4 +142,4 @@ export const catalogSlice = createSlice({
 
 export const productSelectors = productsAdapter.getSelectors((state: RootState) => state.catalog);
 
-export const {setProductParams, resetProductParams, setMetaData} = catalogSlice.actions;
+export const {setProductParams, resetProductParams, setMetaData, setPageNumber} = catalogSlice.actions;

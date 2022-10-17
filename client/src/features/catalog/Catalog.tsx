@@ -5,7 +5,7 @@ import CheckboxButtons from "../../app/components/CheckboxButtons";
 import RadioButtonGroup from "../../app/components/RadioButtonGroup";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
-import { fetchFilters, fetchProductsAsync, productSelectors, setProductParams } from "./catalogSlice";
+import { fetchFilters, fetchProductsAsync, productSelectors, setPageNumber, setProductParams } from "./catalogSlice";
 import ProductList from "./ProductList";
 import ProductSearch from "./ProductSearch";
 
@@ -17,7 +17,7 @@ const sortOptions = [
 
 export default function Catalog() {
     const products = useAppSelector(productSelectors.selectAll);
-    const { productsLoaded, status, filtersLoaded, brands, types, productParams, metaData } = useAppSelector(state => state.catalog); //status: 'idle' | 'loading' | 'succeeded' | 'failed'
+    const { productsLoaded, filtersLoaded, brands, types, productParams, metaData } = useAppSelector(state => state.catalog); //status: 'idle' | 'loading' | 'succeeded' | 'failed'
     const dispatch = useAppDispatch();
 
     useEffect(() => { //1st param: callback function
@@ -29,7 +29,7 @@ export default function Catalog() {
     }, [filtersLoaded, dispatch])//2nd param: Dependency injector. if using empty array that means this is only ever going to be called once.
     //if forget to put the 2nd param, useEffect gonna be call everytime of render or rerender (could be infinite loop)
 
-    if (status.includes('pending') || !metaData) return <LoadingComponent message='Loading Products...' />
+    if (!filtersLoaded) return <LoadingComponent message='Loading products...' />
 
     return (
         <Grid container columnSpacing={4}>
@@ -65,10 +65,11 @@ export default function Catalog() {
             </Grid>
             <Grid item xs={3} />
             <Grid item xs={9} sx={{ mb: 2 }}>
+                {metaData &&
                 <AppPagination 
                     metaData = {metaData}
-                    onPageChange = {(page: number) => dispatch(setProductParams({pageNumber: page}))}
-                />
+                    onPageChange = {(page: number) => dispatch(setPageNumber({pageNumber: page}))}
+                />}
             </Grid>
         </Grid>
 
