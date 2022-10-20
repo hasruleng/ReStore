@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
+using API.Entities;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,17 +16,17 @@ namespace API
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
             using var scope = host.Services.CreateScope(); //using bisa buat berfungsi untuk auto release alokasi (kyk garbage collector/finally)
             var context = scope.ServiceProvider.GetRequiredService<StoreContext>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>(); //log the exception into logger
             try
             {
-                context.Database.Migrate();
-                DbInitializer.Initialize(context);
-            }
+                await context.Database.MigrateAsync();
+                await DbInitializer.Initialize(context, userManager);            }
             catch (System.Exception ex)
             {
                 logger.LogError(ex, "Problem migrating data:");
