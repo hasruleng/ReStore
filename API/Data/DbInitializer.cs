@@ -30,7 +30,7 @@ namespace API.Data
 
             if (context.Products.Any()) return;
 
-            var products = new List<Product>
+            var products = new List<Product> //contoh penggunaan Generic class
             {
                 		new Product
                 {
