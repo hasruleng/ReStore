@@ -1,7 +1,9 @@
+using System.Text;
 using API.Data;
 using API.Entities;
 using API.Middleware;
 using API.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -9,13 +11,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Collections.Generic;
 
 namespace API
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration) 
+        public Startup(IConfiguration configuration)
         { //inject things into clasess, so it/they are available to access inside class
             Configuration = configuration; //what being injected is some configuration settings, e.g.: connection strings
         }
@@ -27,22 +31,60 @@ namespace API
         {
 
             services.AddControllers();
-            services.AddSwaggerGen(c =>
+            services.AddSwaggerGen(c => //these all are boiler plate to make swagger happy
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPIv5", Version = "v1" });
+                c.AddSecurityDefinition("Bearer",new OpenApiSecurityScheme
+                {
+                    Description = "Jwt Auth Bearer",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type  = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            Scheme = "oauth2",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header
+                        },
+                        new List<string>()
+                    }
+                });
             });
-            services.AddDbContext<StoreContext>(opt =>{
+            services.AddDbContext<StoreContext>(opt =>
+            {
                 opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
             services.AddCors();
             services.AddIdentityCore<User>(opt =>
                 {
-                    opt.User.RequireUniqueEmail=true;
+                    opt.User.RequireUniqueEmail = true;
                 }
             )
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<StoreContext>();
-            services.AddAuthentication();
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(opt =>
+            {
+                opt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
+                        .GetBytes(Configuration["JWTSettings:TokenKey"]))
+                };
+            });
             services.AddAuthorization();
             services.AddScoped<TokenService>();
         }
@@ -62,10 +104,11 @@ namespace API
             // app.UseHttpsRedirection();
 
             app.UseRouting(); //middleware for routing, order is important here, but not in ConfigureServices
-            app.UseCors( opt=>
+            app.UseCors(opt =>
             {
-                opt.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:3000","http://localhost:3001");
+                opt.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:3000", "http://localhost:3001");
             });
+            app.UseAuthentication(); //middleware for authentication
             app.UseAuthorization(); //middleware for authorization
 
             app.UseEndpoints(endpoints => //middleware for mapping endpoint for the controller
