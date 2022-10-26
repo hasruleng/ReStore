@@ -14,13 +14,15 @@ import 'react-toastify/dist/ReactToastify.css';
 import ServerError from "../errors/ServerError";
 import NotFound from "../errors/NotFound";
 import BasketPage from "../../features/basket/BasketPage";
-import { useStoreContext } from "../context/StoreContext";
+// import { useStoreContext } from "../context/StoreContext";
 import { getCookie } from "../util/util";
 import agent from "../api/agent";
 import LoadingComponent from "./LoadingComponent";
 import CheckoutPage from "../../features/checkout/CheckoutPage";
 import { useAppDispatch } from "../store/configureStore";
 import { setBasket } from "../../features/basket/basketSlice";
+import Login from "../../features/account/Login";
+import Register from "../../features/account/Register";
 
 
 function App() { // functional component, a function that return jsx (html a look-alike)
@@ -75,6 +77,8 @@ function App() { // functional component, a function that return jsx (html a loo
             <Route path='/server-error' component={ServerError} />
             <Route path='/basket' component={BasketPage} />
             <Route path='/checkout' component={CheckoutPage} />
+            <Route path='/login' component={Login} />
+            <Route path='/register' component={Register} />
             <Route component={NotFound} />
           </Switch>
         </Container>
