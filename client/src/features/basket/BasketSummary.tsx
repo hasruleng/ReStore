@@ -1,4 +1,4 @@
-import { TableContainer, Paper, Table, TableBody, TableRow, TableCell, Typography } from "@mui/material";
+import { TableContainer, Paper, Table, TableBody, TableRow, TableCell } from "@mui/material";
 import { Basket } from "../../app/models/basket";
 import { currencyFormat, totalQuantity } from "../../app/util/util";
 
