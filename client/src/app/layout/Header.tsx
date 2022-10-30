@@ -4,6 +4,7 @@ import { Link, NavLink } from "react-router-dom";
 import { useStoreContext } from "../context/StoreContext";
 import { useAppSelector } from "../store/configureStore";
 import { totalQuantity } from "../util/util";
+import SignedInMenu from "./SignedInMenu";
 
 interface Props {
     darkMode: boolean;
@@ -22,10 +23,11 @@ const rightLinks = [
 ]
 
 export default function Header({ darkMode, handleThemeChange }: Props) {
-    
-//    const {basket} = useStoreContext();//react context
-   const {basket} = useAppSelector(state=>state.basket); //sblmnya di App udah pake redux, abis ganti dari yg atas ke ini langsung muncul basket counter
-   const itemCount = totalQuantity(basket); //? berfungsi sebagai pengaman kalau basketnya null
+
+    //    const {basket} = useStoreContext();//react context
+    const { basket } = useAppSelector(state => state.basket); //sblmnya di App udah pake redux, abis ganti dari yg atas ke ini langsung muncul basket counter
+    const { user } = useAppSelector(state => state.account); //sblmnya di App udah pake redux, abis ganti dari yg atas ke ini langsung muncul basket counter
+    const itemCount = totalQuantity(basket); //? berfungsi sebagai pengaman kalau basketnya null
 
     return (
         <AppBar position="static" sx={{ mb: 4 }}>
@@ -64,22 +66,27 @@ export default function Header({ darkMode, handleThemeChange }: Props) {
 
                 <Box display='flex' alignItems='center'>
                     <IconButton component={Link} to='/basket' size='large' sx={{ color: 'inherit' }}>
-                        <Badge badgeContent={itemCount  } color='secondary'>
+                        <Badge badgeContent={itemCount} color='secondary'>
                             <ShoppingCart />
                         </Badge>
                     </IconButton>
-                    <List sx={{ display: 'flex' }}>
-                        {rightLinks.map(({ title, path }) => (
-                            <ListItem
-                                component={NavLink}
-                                to={path}
-                                key={path}
-                                sx={{ color: 'inherit', typography: 'h6' }}
-                            >
-                                {title.toUpperCase()}
-                            </ListItem>
-                        ))}
-                    </List>
+                    {user ? (
+                        <SignedInMenu />
+                    ) : (
+                        <List sx={{ display: 'flex' }}>
+                            {rightLinks.map(({ title, path }) => (
+                                <ListItem
+                                    component={NavLink}
+                                    to={path}
+                                    key={path}
+                                    sx={{ color: 'inherit', typography: 'h6' }}
+                                >
+                                    {title.toUpperCase()}
+                                </ListItem>
+                            ))}
+                        </List>
+                    )}
+
                 </Box>
             </Toolbar>
         </AppBar>
