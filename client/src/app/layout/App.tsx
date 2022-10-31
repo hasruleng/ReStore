@@ -23,6 +23,7 @@ import { useAppDispatch } from "../store/configureStore";
 import { setBasket } from "../../features/basket/basketSlice";
 import Login from "../../features/account/Login";
 import Register from "../../features/account/Register";
+import { fetchCurrentUser } from "../../features/account/accountSlice";
 
 
 function App() { // functional component, a function that return jsx (html a look-alike)
@@ -32,6 +33,7 @@ function App() { // functional component, a function that return jsx (html a loo
 
   useEffect(() => {
     const buyerId = getCookie('buyerId');
+    dispatch(fetchCurrentUser());
     if (buyerId) {
       agent.Basket.get()
         // .then(basket => setBasket(basket))
