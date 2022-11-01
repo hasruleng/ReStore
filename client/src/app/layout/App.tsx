@@ -1,7 +1,7 @@
 import { ThemeProvider } from "@emotion/react";
 import { Container, createTheme } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Route, Switch } from "react-router-dom";
 import AboutPage from "../../features/about/AboutPage";
 import Catalog from "../../features/catalog/Catalog";
@@ -15,12 +15,10 @@ import ServerError from "../errors/ServerError";
 import NotFound from "../errors/NotFound";
 import BasketPage from "../../features/basket/BasketPage";
 // import { useStoreContext } from "../context/StoreContext";
-import { getCookie } from "../util/util";
-import agent from "../api/agent";
 import LoadingComponent from "./LoadingComponent";
 import CheckoutPage from "../../features/checkout/CheckoutPage";
 import { useAppDispatch } from "../store/configureStore";
-import { setBasket } from "../../features/basket/basketSlice";
+import { fetchBasketAsync } from "../../features/basket/basketSlice";
 import Login from "../../features/account/Login";
 import Register from "../../features/account/Register";
 import { fetchCurrentUser } from "../../features/account/accountSlice";
@@ -31,7 +29,17 @@ function App() { // functional component, a function that return jsx (html a loo
   const dispatch = useAppDispatch(); //ini pake redux toolkit
   const [loading, setLoading] = useState(true);
 
+  const initApp = useCallback(async () => { // cuma sekali dijalanin pas inisialisasi aplikasi, disimpan di memori
+    try {
+      await dispatch(fetchCurrentUser());
+      await dispatch(fetchBasketAsync());
+    } catch (error) {
+      console.log(error);
+    }
+  }, [dispatch])
+
   useEffect(() => {
+    /* segini diganti initApp
     const buyerId = getCookie('buyerId');
     dispatch(fetchCurrentUser());
     if (buyerId) {
@@ -42,8 +50,9 @@ function App() { // functional component, a function that return jsx (html a loo
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
-    }
-  }, [dispatch])
+    }//*/
+    initApp().then(() => setLoading(false));
+  }, [initApp]) //sebelumnya dependencnya ke 'dispatch
 
   const [darkMode, setDarkMode] = useState(false);
   const paletteType = darkMode ? 'dark' : 'light'
