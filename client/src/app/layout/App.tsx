@@ -43,7 +43,7 @@ function App() { // functional component, a function that return jsx (html a loo
     } else {
       setLoading(false);
     }
-  }, [setBasket])
+  }, [dispatch])
 
   const [darkMode, setDarkMode] = useState(false);
   const paletteType = darkMode ? 'dark' : 'light'
