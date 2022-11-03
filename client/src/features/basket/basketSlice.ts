@@ -59,6 +59,9 @@ export const basketSlice = createSlice({
         setBasket: (state, action) => {
             console.log('set basketnya jalan');
             state.basket = action.payload; //ambil dari BE dotnet
+        },
+        clearBasket: (state) => {
+            state.basket = null;
         }
     },
     extraReducers: (builder => {
@@ -94,4 +97,4 @@ export const basketSlice = createSlice({
     })
 })
 
-export const { setBasket } = basketSlice.actions;
+export const { setBasket, clearBasket } = basketSlice.actions;
