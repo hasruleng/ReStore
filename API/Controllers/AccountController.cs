@@ -1,62 +1,44 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using API.Data;
 using API.DTOs;
 using API.Entities;
-using API.Extensions;
 using API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
-    public class AccountController : BaseApiController
+    public class AccountController: BaseApiController
     {
         private readonly UserManager<User> _userManager;
         private readonly TokenService _tokenService;
-        private readonly StoreContext _context;
-        public AccountController(UserManager<User> userManager, TokenService tokenService, StoreContext context)
-        {
-            _context = context;
+        public AccountController(UserManager<User> userManager, TokenService tokenService){
             _tokenService = tokenService;
             _userManager = userManager; //make use of the user manager to allow us to log in and register users into our app
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
-        { //async method ini return typenya User
+        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto){ //async method ini return typenya User
             var user = await _userManager.FindByNameAsync(loginDto.UserName); //return typenya User
-            if (user == null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
+            if (user==null || !await _userManager.CheckPasswordAsync(user, loginDto.Password))
                 return Unauthorized();
 
-            var userBasket = await RetrieveBasket (loginDto.UserName);
-            var anonBasket = await RetrieveBasket (Request.Cookies["buyerId"]); //if we are logging in we need to transfer this to our user
-
-            if (anonBasket!=null){
-                if (userBasket!=null) _context.Baskets.Remove(userBasket);
-                anonBasket.BuyerId= user.UserName;
-                Response.Cookies.Delete("buyerId");
-                await _context.SaveChangesAsync();
-            }
-
-            return new UserDto
-            {
-                Email = user.Email,
-                Token = await _tokenService.GenerateToken(user),
-                Basket = anonBasket != null ? anonBasket.MapBasketToDto() : userBasket.MapBasketToDto()
+            return new UserDto{
+                Email=user.Email,
+                Token = await _tokenService.GenerateToken(user)
             };
         }
         [HttpPost("register")]
-        public async Task<ActionResult> Register(RegisterDto registerDto)
-        { //async method ini return typenya void (ga perlu return apapun)
-            var user = new User { UserName = registerDto.UserName, Email = registerDto.Email };
+        public async Task<ActionResult> Register(RegisterDto registerDto){ //async method ini return typenya void (ga perlu return apapun)
+            var user = new User{UserName=registerDto.UserName, Email=registerDto.Email}; 
             var result = await _userManager.CreateAsync(user, registerDto.Password); //username harus unik & password harus strong
 
             if (!result.Succeeded)
             {
-                foreach (var error in result.Errors)
-                {
+                foreach(var error in result.Errors){
                     ModelState.AddModelError(error.Code, error.Description);
                 }
 
@@ -67,30 +49,15 @@ namespace API.Controllers
 
             return StatusCode(201);
         }
-
+        
         [Authorize]
         [HttpGet("currentUser")]
-        public async Task<ActionResult<UserDto>> GetCurrentUser()
-        {
+        public async Task<ActionResult<UserDto>> GetCurrentUser(){
             var user = await _userManager.FindByNameAsync(User.Identity.Name);
-            return new UserDto
-            {
+            return new UserDto{
                 Email = user.Email,
                 Token = await _tokenService.GenerateToken(user)
             };
-        }
-
-        private async Task<Basket> RetrieveBasket(string buyerId)
-        {
-            if (string.IsNullOrEmpty(buyerId))
-            { //kalau buyerIdnya tidak ada, maka
-                Response.Cookies.Delete("buyerId");
-                return null; //basket dinullkan 
-            }
-            return await _context.Baskets
-                .Include(i => i.Items)
-                .ThenInclude(p => p.Product)
-                .FirstOrDefaultAsync(x => x.BuyerId == buyerId);
         }
     }
 }
