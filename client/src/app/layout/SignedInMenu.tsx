@@ -9,7 +9,7 @@ export default function SignedInMenu() {
     const {user} = useAppSelector(state => state.account);
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
-    const handleClick = (event: any) => { 
+    const handleClick = (event: any) => {
         setAnchorEl(event.currentTarget);
     };
     const handleClose = () => {
