@@ -7,6 +7,9 @@ namespace API.Extensions
     public static class BasketExtensions
     {
         public static BasketDto MapBasketToDto(this Basket basket){
+            if (basket == null) 
+                return null;
+
             return new BasketDto
             {
                 Id = basket.Id,

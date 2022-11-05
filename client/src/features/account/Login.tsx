@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Paper } from '@mui/material';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import { FieldValues, useForm } from 'react-hook-form';
 import { LoadingButton } from '@mui/lab';
 import { useAppDispatch } from '../../app/store/configureStore';
@@ -17,6 +17,7 @@ const theme = createTheme();
 
 export default function Login() {
   const history = useHistory();
+  const location = useLocation<any>();
   const dispatch = useAppDispatch();
 
   const { register, handleSubmit, formState: { isSubmitting, errors, isValid } } = useForm({
@@ -24,8 +25,12 @@ export default function Login() {
   });
 
   async function submitForm(data: FieldValues) {
-    await dispatch(signInUser(data));
-    history.push('/catalog');
+    try {
+      await dispatch(signInUser(data));
+      history.push(location.state.from.pathname || '/catalog');
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   return (
@@ -48,8 +53,8 @@ export default function Login() {
             {...register('username', { required: 'Username is required' })}
             error={!!errors.username}
             helperText={errors?.username?.message?.toString()}
-        />
-        <TextField
+          />
+          <TextField
             margin="normal"
             fullWidth
             label="Password"
@@ -57,7 +62,7 @@ export default function Login() {
             {...register('password', { required: 'Password is required' })}
             error={!!errors.password}
             helperText={errors?.password?.message?.toString()}
-        />
+          />
           <LoadingButton loading={isSubmitting}
             disabled={!isValid}
             type="submit"

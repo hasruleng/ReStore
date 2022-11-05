@@ -33,18 +33,20 @@ namespace API.Controllers
             var userBasket = await RetrieveBasket (loginDto.UserName);
             var anonBasket = await RetrieveBasket (Request.Cookies["buyerId"]); //if we are logging in we need to transfer this to our user
 
-            if (anonBasket!=null){
-                if (userBasket!=null) _context.Baskets.Remove(userBasket);
+            if (anonBasket!=null){ //jika anonBasket tidak kosong maka jadikan sbg userBasket
+                if (userBasket!=null) _context.Baskets.Remove(userBasket); //userBasket dihapus
                 anonBasket.BuyerId= user.UserName;
                 Response.Cookies.Delete("buyerId");
                 await _context.SaveChangesAsync();
             }
+            
+            var basketDto = anonBasket != null ? anonBasket.MapBasketToDto() : userBasket.MapBasketToDto();
 
             return new UserDto
             {
                 Email = user.Email,
                 Token = await _tokenService.GenerateToken(user),
-                Basket = anonBasket != null ? anonBasket.MapBasketToDto() : userBasket.MapBasketToDto()
+                Basket = basketDto
             };
         }
         [HttpPost("register")]
@@ -73,10 +75,13 @@ namespace API.Controllers
         public async Task<ActionResult<UserDto>> GetCurrentUser()
         {
             var user = await _userManager.FindByNameAsync(User.Identity.Name);
+            var userBasket = await RetrieveBasket (User.Identity.Name); //supaya ada basket kalau masih ada token user
+
             return new UserDto
             {
                 Email = user.Email,
-                Token = await _tokenService.GenerateToken(user)
+                Token = await _tokenService.GenerateToken(user),
+                Basket = userBasket.MapBasketToDto()
             };
         }
 
