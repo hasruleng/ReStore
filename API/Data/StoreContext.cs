@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
-    public class StoreContext : IdentityDbContext<User> //DbContext is already a combination of UnitofWork and Repository patterns.
+    public class StoreContext : IdentityDbContext<User, Role, int> //DbContext is already a combination of UnitofWork and Repository patterns.
     {
         public StoreContext(DbContextOptions options) : base(options) //the options will be the database connection strings
         {
@@ -25,10 +25,15 @@ namespace API.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<IdentityRole>() //this is gonna happen inside our migration (jalan di awal)
+            builder.Entity<User>()
+                .HasOne(a => a.Address)
+                .WithOne()
+                .HasForeignKey<UserAddress>(a=>a.Id)
+                .OnDelete(DeleteBehavior.Cascade);
+            builder.Entity<Role>() //this is gonna happen inside our migration (jalan di awal)
                 .HasData(
-                    new IdentityRole{Name = "Member", NormalizedName = "MEMBER"},
-                    new IdentityRole{Name = "Admin", NormalizedName = "ADMIN"}
+                    new Role{Id=1, Name = "Member", NormalizedName = "MEMBER"},
+                    new Role{Id=2, Name = "Admin", NormalizedName = "ADMIN"}
                 );
         }
     }
