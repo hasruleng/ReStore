@@ -19,7 +19,7 @@ export default function BasketSummary({ basket }: Props) { //ini gua pake cara p
         // console.log('subtotal ='+subtotal);//ternyata angka di subtotal itu dikali 100 
     }
     else {//you gotta pay delivery fee
-        deliveryFee = (totalQuantity(basket)) * 100;
+        deliveryFee = 500;
     }
     return (
         <>
