@@ -5,16 +5,15 @@ interface StoreContextValue { //berisi states (three properties) to go and set t
     basket: Basket | null;
     setBasket: (basket: Basket) => void;
     removeItem: (productId: number, quantity: number) => void;
-
 }
 
-export const StoreContext = createContext <StoreContextValue | undefined>(undefined)
+export const StoreContext = createContext<StoreContextValue | undefined>(undefined);
 
 export function useStoreContext() { //this gives us access to our context, and three props above
-    const context = useContext(StoreContext)
+    const context = useContext(StoreContext);
 
     if (context === undefined){
-        throw ('Oops - we do not seem to be inside the provider');
+        throw Error('Oops - we do not seem to be inside the provider');
     }
     return context;
 }

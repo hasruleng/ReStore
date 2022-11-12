@@ -1,26 +1,13 @@
 import { TableContainer, Paper, Table, TableBody, TableRow, TableCell } from "@mui/material";
-import { Basket } from "../../app/models/basket";
-import { currencyFormat, totalQuantity } from "../../app/util/util";
+import { useAppSelector } from "../../app/store/configureStore";
+import { currencyFormat } from "../../app/util/util";
 
 
-interface Props {
-    basket: Basket;
-}
+export default function BasketSummary() { //ini gua pake cara passing parameters, pantesan ga ada storeContext kayak di contoh, jadi ga pake redux toolkit deh
+    const {basket} = useAppSelector(state => state.basket);
+    const subtotal = basket?.items.reduce((sum, item) => sum + (item.quantity * item.price), 0) ?? 0;
+    const deliveryFee = subtotal > 10000 ? 0 : 500;
 
-export default function BasketSummary({ basket }: Props) { //ini gua pake cara passing parameters, pantesan ga ada storeContext kayak di contoh, jadi ga pake redux toolkit deh
-    var subtotal = 0;
-    var deliveryFee = 0;
-
-    for (let i = 0; i < basket.items.length; i++) {
-        subtotal += basket.items[i].price * basket.items[i].quantity;
-    }
-    if (subtotal/100 > 100) {//Orders over $100 qualify for free delivery
-        deliveryFee = 0;
-        // console.log('subtotal ='+subtotal);//ternyata angka di subtotal itu dikali 100 
-    }
-    else {//you gotta pay delivery fee
-        deliveryFee = 500;
-    }
     return (
         <>
             <TableContainer component={Paper} variant={'outlined'}>
@@ -40,7 +27,7 @@ export default function BasketSummary({ basket }: Props) { //ini gua pake cara p
                         </TableRow>
                         <TableRow>
                             <TableCell>
-                                <span style={{ fontStyle: 'italic' }}>*Orders over $100 qualify for free delivery</span>
+                                <span style={{fontStyle: 'italic'}}>*Orders over $100 qualify for free delivery</span>
                             </TableCell>
                         </TableRow>
                     </TableBody>
