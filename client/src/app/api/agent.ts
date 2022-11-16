@@ -88,7 +88,8 @@ const Basket = {
 const Account = {
     login: (values: any) => requests.post('account/login', values),
     register: (values: any) => requests.post('account/register', values),
-    currentUser: () => requests.get('account/currentUser') //ga ada input parameter  
+    currentUser: () => requests.get('account/currentUser'), //ga ada input parameter karena get
+    fetchAddress: () => requests.get('account/savedAddress')
 }
 
 const Orders = {

@@ -80,8 +80,11 @@ namespace API.Controllers
             _context.Baskets.Remove(basket);
 
             if (orderDto.SaveAddress){
-                var user = await _context.Users.FirstOrDefaultAsync(x => x.UserName==User.Identity.Name); //query DB directly, not trough UM
-                user.Address = new UserAddress{
+                var user = await _context.Users
+                .Include(a => a.Address) //include the address we need to at the loading
+                .FirstOrDefaultAsync(x => x.UserName==User.Identity.Name); //query DB directly, not trough UM
+                
+                var address = new UserAddress{
                     FullName=orderDto.ShippingAddress.FullName,
                     Address1=orderDto.ShippingAddress.Address1,
                     Address2=orderDto.ShippingAddress.Address2,
@@ -90,7 +93,7 @@ namespace API.Controllers
                     Zip=orderDto.ShippingAddress.Zip,
                     Country=orderDto.ShippingAddress.Country
                 };
-                _context.Update(user);
+                user.Address = address; //pake EF begini aja bisa tahu update/insert (Goks!)
             }
             var result = await _context.SaveChangesAsync() >0; 
 
