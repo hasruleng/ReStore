@@ -91,6 +91,7 @@ function App() { // functional component, a function that return jsx (html a loo
             <Route path='/basket' component={BasketPage} />
             <PrivateRoute path='/checkout' component={CheckoutPage} />
             <PrivateRoute path='/orders' component={Orders} />
+            {/* <PrivateRoute path='/orderdetails' component={OrderDetails} /> */}
             <Route path='/login' component={Login} />
             <Route path='/register' component={Register} />
             <Route component={NotFound} />

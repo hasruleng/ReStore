@@ -9,7 +9,7 @@
         country: string;
     }
 
-    export interface OrderItem {
+    export interface OrderItem {//kurang dari BasketItem: brand, type
         productId: number;
         name: string;
         pictureUrl: string;
