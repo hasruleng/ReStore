@@ -13,7 +13,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.6" /><!-- beda versi sama dotnet ef migration yang 6.0.4-->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.6" />
+    <PackageReference Include="Stripe.net" Version="41.1.0" /><!-- beda versi sama dotnet ef migration yang 6.0.4-->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" /><!--related to swagger-->
   </ItemGroup>
 
