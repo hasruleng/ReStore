@@ -16,7 +16,6 @@ import NotFound from "../errors/NotFound";
 import BasketPage from "../../features/basket/BasketPage";
 // import { useStoreContext } from "../context/StoreContext";
 import LoadingComponent from "./LoadingComponent";
-import CheckoutPage from "../../features/checkout/CheckoutPage";
 import { useAppDispatch } from "../store/configureStore";
 import { fetchBasketAsync } from "../../features/basket/basketSlice";
 import Login from "../../features/account/Login";
@@ -24,6 +23,7 @@ import Register from "../../features/account/Register";
 import { fetchCurrentUser } from "../../features/account/accountSlice";
 import PrivateRoute from "./PrivateRoute";
 import Orders from "../../features/order/Orders";
+import CheckoutWrapper from "../../features/checkout/CheckoutWrapper";
 
 
 function App() { // functional component, a function that return jsx (html a look-alike)
@@ -89,7 +89,7 @@ function App() { // functional component, a function that return jsx (html a loo
             <Route path='/contact' component={ContactPage} />
             <Route path='/server-error' component={ServerError} />
             <Route path='/basket' component={BasketPage} />
-            <PrivateRoute path='/checkout' component={CheckoutPage} />
+            <PrivateRoute path='/checkout' component={CheckoutWrapper} />
             <PrivateRoute path='/orders' component={Orders} />
             {/* <PrivateRoute path='/orderdetails' component={OrderDetails} /> */}
             <Route path='/login' component={Login} />
