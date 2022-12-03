@@ -76,7 +76,7 @@ export default function CheckoutPage() {
             const cardElement = elements.getElement(CardNumberElement);
             const paymentResult = await stripe.confirmCardPayment(basket?.clientSecret!, {
                 payment_method: {
-                    card: cardElement!,
+                    card: cardElement!, //override cardElement probably be null
                     billing_details: {
                         name: nameOnCard
                     }
