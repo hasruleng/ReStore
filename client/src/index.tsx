@@ -9,6 +9,8 @@ import { StoreProvider } from './app/context/StoreContext';
 // import { configureStore } from './app/store/configureStore';
 import { Provider } from 'react-redux';
 import { store } from './app/store/configureStore';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 export const history = createBrowserHistory();
 // store.dispatch(fetchProductsAsync());//temporary: to see the effectivenes of redux catalogSlice

@@ -1,9 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <!--<Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings> Remove dotnet 6 way of doing things (8. .Net 6 project changes)-->
+    <UserSecretsId>085737ab-b98f-4233-aab7-562eadeb988d</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

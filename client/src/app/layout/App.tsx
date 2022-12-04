@@ -80,9 +80,10 @@ function App() { // functional component, a function that return jsx (html a loo
         <CssBaseline />
         <Header darkMode={darkMode} handleThemeChange={handleThemeChange} />
         {/* <h1 style={{color:'blue'}}>Re-store</h1> */}
-        <Container>
+        <Route exact path='/' component={HomePage} />
+        <Route path={'/(.+)'} render={()=> (
+        <Container sx={{ mt: 4 }}>
           <Switch>
-            <Route exact path='/' component={HomePage} />
             <Route exact path='/catalog' component={Catalog} />
             <Route path='/catalog/:id' component={ProductDetails} />
             <Route path='/about' component={AboutPage} />
@@ -96,6 +97,7 @@ function App() { // functional component, a function that return jsx (html a loo
             <Route component={NotFound} />
           </Switch>
         </Container>
+        )} /> 
       </ThemeProvider>
     </>
   );
