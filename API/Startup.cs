@@ -105,6 +105,10 @@ namespace API
             // app.UseHttpsRedirection();
 
             app.UseRouting(); //middleware for routing, order is important here, but not in ConfigureServices
+
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+            
             app.UseCors(opt =>
             {
                 opt.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:3000", "http://localhost:3001");
@@ -115,6 +119,7 @@ namespace API
             app.UseEndpoints(endpoints => //middleware for mapping endpoint for the controller
             {
                 endpoints.MapControllers();
+                endpoints.MapFallbackToController("Index", "Fallback");
             });
         }
     }
