@@ -24,12 +24,13 @@ export default function Login() {
     mode: 'all' //sebelumnya 'onTouched' artinya baru mulai memvalidasi isi form (required) setelah ngeklik dulu
   });
 
+
   async function submitForm(data: FieldValues) {
     try {
       await dispatch(signInUser(data));
-      history.push(location.state.from.pathname || '/catalog');
+      history.push(location.state?.from?.pathname || '/catalog');
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   }
 
