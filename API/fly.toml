@@ -9,7 +9,9 @@ processes = []
   image = "hasrule/restore:latest"
 
 [env]
-
+  ASPNETCORE_URLS="http://+:8080"
+  StripeSettings__PublishableKey="pk_test_51M7hj8BItdeV1CBcgDOkhHpBQUKgGd9pzEA6a2Oom38cJ5BcQwQfICJ3ydB6m8M3GWQX4bVXJbSg5CDtqQ1YDDVY009bEI98hv"
+  
 [experimental]
   allowed_public_ports = []
   auto_rollback = true
