@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace API.Services
         {
             StripeConfiguration.ApiKey = _config["StripeSettings:SecretKey"];
 
+            // System.Diagnostics.Debug.WriteLine("StripeConfiguration.ApiKey:"+_config["StripeSettings:SecretKey"]); //buat ngecek StripeConfiguration.ApiKey
             var service = new PaymentIntentService();
 
             var intent = new PaymentIntent();
