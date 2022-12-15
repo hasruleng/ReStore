@@ -3,9 +3,12 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using API.Data;
+using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.RequestHelpers;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,11 +19,13 @@ namespace API.Controllers
      // so that we've got access to the products table in our database.
 
         private readonly StoreContext _context;
+        private readonly IMapper _mapper;
 
         //in order to use dependency injection, we create a private field inside our class and assign that private fields to the context that we're adding in our constructor here.
-        public ProductsController(StoreContext context)
+        public ProductsController(StoreContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
 
         }
 
@@ -44,7 +49,7 @@ namespace API.Controllers
             return products;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name="GetProduct")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
             var product = await _context.Products.FindAsync(id);
@@ -61,6 +66,20 @@ namespace API.Controllers
             var brands = await _context.Products.Select(p => p.Brand).Distinct().ToListAsync();
             var types = await _context.Products.Select(p => p.Type).Distinct().ToListAsync();
             return Ok(new { brands, types });
+        }
+
+        [Authorize(Roles ="Admin")]
+        [HttpPost]
+        public async Task<ActionResult<Product>> CreateProduct(CreateProductDto productDto){
+
+            var product = _mapper.Map<Product> (productDto);
+            _context.Products.Add(product);
+            var result = await _context.SaveChangesAsync() > 0;
+            
+            if (result) return CreatedAtRoute("GetProduct", new {Id=product.Id}, product);
+
+            return BadRequest(new ProblemDetails {Title ="Problem creating new product"});
+
         }
     }
 }

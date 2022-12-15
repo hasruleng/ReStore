@@ -55,8 +55,7 @@ namespace API.Controllers
         }
         
         [HttpPost("webhook")]
-        public async Task<ActionResult> StripeWebhook()
-        {
+        public async Task<ActionResult> StripeWebhook(){
             var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
 
             var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"],
@@ -64,14 +63,14 @@ namespace API.Controllers
 
             var charge = (Charge)stripeEvent.Data.Object;
 
-            var order = await _context.Orders.FirstOrDefaultAsync(x => 
-                x.PaymentIntentId == charge.PaymentIntentId);
+            var order = await _context.Orders.FirstOrDefaultAsync(x =>
+             x.PaymentIntentId == charge.PaymentIntentId); //cari order dengan paymentIntentId yang sama dengan webhook yg diterima
 
-            if (charge.Status == "succeeded") order.OrderStatus = OrderStatus.PaymentReceived;
+            if (charge.Status == "succeeded") order.OrderStatus = OrderStatus.PaymentReceived; //update status pembayaran pada Order
 
             await _context.SaveChangesAsync();
 
-            return new EmptyResult();
+            return new EmptyResult(); //to let Stripe know that we receive their request
         }
     }
 }
