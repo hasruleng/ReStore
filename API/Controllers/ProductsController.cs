@@ -10,6 +10,7 @@ using API.RequestHelpers;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
@@ -80,6 +81,40 @@ namespace API.Controllers
 
             return BadRequest(new ProblemDetails {Title ="Problem creating new product"});
 
+        }
+
+        
+        [Authorize(Roles ="Admin")]
+        [HttpPut]
+        public async Task<ActionResult<Product>> UpdateProduct(UpdateProductDto productDto){
+
+            var product = await _context.Products.FindAsync(productDto.Id); //EF tracking the product
+
+            if (product==null) return NotFound();
+
+            _mapper.Map(productDto,product); //whatever chaing inside this product EF is aware, siap2 updating
+            
+            var result = await _context.SaveChangesAsync() > 0; //update ke DB
+            
+            if (result) return NoContent();
+
+            return BadRequest(new ProblemDetails {Title ="Problem updating product"});
+
+        }
+
+        
+        [Authorize(Roles ="Admin")]
+        [HttpDelete("{id}")]        
+        public async Task<IStatusCodeActionResult> DeleteProduct(int id){
+            
+            var product = await _context.Products.FindAsync(id); 
+            if (product==null) return NotFound();
+            _context.Products.Remove(product); //EF tracking the product, but nothing happens on DB, yet!
+            var result = await _context.SaveChangesAsync() > 0; //update ke DB
+            if (result) return Ok();
+
+            return BadRequest(new ProblemDetails {Title ="Problem deleting product"});
+            
         }
     }
 }

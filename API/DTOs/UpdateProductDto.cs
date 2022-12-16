@@ -4,8 +4,9 @@ using Microsoft.AspNetCore.Http;
 
 namespace API.DTOs
 {
-    public class CreateProductDto
+    public class UpdateProductDto
     {
+        public int Id { get; set; }
         [Required]
         public string Name { get; set; }
         [Required]
@@ -19,7 +20,7 @@ namespace API.DTOs
         [Required]
         public string Brand { get; set; }
         [Required]
-        [Range(0,200)]
+        [Range(0, 200)]
         public int QuantityInStock { get; set; }
     }
 }
