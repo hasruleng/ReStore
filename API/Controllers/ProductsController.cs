@@ -7,6 +7,7 @@ using API.DTOs;
 using API.Entities;
 using API.Extensions;
 using API.RequestHelpers;
+using API.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,10 +22,12 @@ namespace API.Controllers
 
         private readonly StoreContext _context;
         private readonly IMapper _mapper;
+        private readonly ImageService _imageService;
 
         //in order to use dependency injection, we create a private field inside our class and assign that private fields to the context that we're adding in our constructor here.
-        public ProductsController(StoreContext context, IMapper mapper)
+        public ProductsController(StoreContext context, IMapper mapper, ImageService imageService)
         {
+            _imageService = imageService;
             _context = context;
             _mapper = mapper;
 
@@ -50,7 +53,7 @@ namespace API.Controllers
             return products;
         }
 
-        [HttpGet("{id}", Name="GetProduct")]
+        [HttpGet("{id}", Name = "GetProduct")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
             var product = await _context.Products.FindAsync(id);
@@ -69,52 +72,85 @@ namespace API.Controllers
             return Ok(new { brands, types });
         }
 
-        [Authorize(Roles ="Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<ActionResult<Product>> CreateProduct(CreateProductDto productDto){
+        public async Task<ActionResult<Product>> CreateProduct([FromForm] CreateProductDto productDto)
+        {
 
-            var product = _mapper.Map<Product> (productDto);
+            var product = _mapper.Map<Product>(productDto);
+
+            if (productDto.File != null)
+            {
+                var imageResult = await _imageService.AddImageAsync(productDto.File);
+
+                if (imageResult.Error != null)
+                    return BadRequest(new ProblemDetails { Title = imageResult.Error.Message });
+
+                product.PictureUrl = imageResult.SecureUrl.ToString();
+                product.PublicId = imageResult.PublicId;
+            }
+
             _context.Products.Add(product);
             var result = await _context.SaveChangesAsync() > 0;
-            
-            if (result) return CreatedAtRoute("GetProduct", new {Id=product.Id}, product);
 
-            return BadRequest(new ProblemDetails {Title ="Problem creating new product"});
+            if (result) return CreatedAtRoute("GetProduct", new { Id = product.Id }, product);
+
+            return BadRequest(new ProblemDetails { Title = "Problem creating new product" });
 
         }
 
-        
-        [Authorize(Roles ="Admin")]
+
+        [Authorize(Roles = "Admin")]
         [HttpPut]
-        public async Task<ActionResult<Product>> UpdateProduct(UpdateProductDto productDto){
+        public async Task<ActionResult<Product>> UpdateProduct([FromForm]UpdateProductDto productDto)
+        {
 
             var product = await _context.Products.FindAsync(productDto.Id); //EF tracking the product
 
-            if (product==null) return NotFound();
+            if (product == null) return NotFound();
 
-            _mapper.Map(productDto,product); //whatever chaing inside this product EF is aware, siap2 updating
-            
+            _mapper.Map(productDto, product); //whatever chaing inside this product EF is aware, siap2 updating
+            if (productDto.File != null)
+            {
+                var imageResult = await _imageService.AddImageAsync(productDto.File);
+
+                if (imageResult.Error != null)
+                    return BadRequest(new ProblemDetails { Title = imageResult.Error.Message });
+
+                //remove old image from Cloudinary
+                if (!string.IsNullOrEmpty(product.PublicId))
+                    await _imageService.DeleteImageAsync(product.PublicId);
+
+                product.PictureUrl = imageResult.SecureUrl.ToString();
+                product.PublicId = imageResult.PublicId;
+            }
+
             var result = await _context.SaveChangesAsync() > 0; //update ke DB
-            
-            if (result) return NoContent();
 
-            return BadRequest(new ProblemDetails {Title ="Problem updating product"});
+            if (result) return Ok(product);
+
+            return BadRequest(new ProblemDetails { Title = "Problem updating product" });
 
         }
 
-        
-        [Authorize(Roles ="Admin")]
-        [HttpDelete("{id}")]        
-        public async Task<IStatusCodeActionResult> DeleteProduct(int id){
-            
-            var product = await _context.Products.FindAsync(id); 
-            if (product==null) return NotFound();
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public async Task<IStatusCodeActionResult> DeleteProduct(int id)
+        {
+
+            var product = await _context.Products.FindAsync(id);
+            if (product == null) return NotFound();
+
+            if (!string.IsNullOrEmpty(product.PublicId))
+                await _imageService.DeleteImageAsync(product.PublicId);
+
             _context.Products.Remove(product); //EF tracking the product, but nothing happens on DB, yet!
             var result = await _context.SaveChangesAsync() > 0; //update ke DB
             if (result) return Ok();
 
-            return BadRequest(new ProblemDetails {Title ="Problem deleting product"});
-            
+            return BadRequest(new ProblemDetails { Title = "Problem deleting product" });
+
         }
     }
 }
