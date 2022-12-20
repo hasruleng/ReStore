@@ -60,7 +60,25 @@ export default function Header({ darkMode, handleThemeChange }: Props) {
                         >
                             {title.toUpperCase()}
                         </ListItem>
+                        
                     ))}
+                    {user &&
+                    <ListItem
+                            component={NavLink}
+                            to={'/inventory'}
+                            sx={{
+                                color: 'inherit',
+                                typography: 'h6',
+                                '&:hover': {
+                                    color: 'grey.500'
+                                },
+                                '&.active': {
+                                    color: 'text.secondary'
+                                }
+                            }}
+                        >
+                            INVENTORY
+                        </ListItem>}
                 </List>
 
                 <Box display='flex' alignItems='center'>
