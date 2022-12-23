@@ -6,6 +6,9 @@ import AppSelectList from "../../app/components/AppSelectList";
 import AppTextInput from "../../app/components/AppTextInput";
 import useProducts from "../../app/hooks/useProducts";
 import { Product } from "../../app/models/product";
+import {yupResolver} from '@hookform/resolvers/yup';
+import { validationSchema } from "./productValidation";
+
 
 interface Props {
     product?: Product;
@@ -14,15 +17,19 @@ interface Props {
 
 export default function ProductForm({product, cancelEdit}: Props) {
 
-    const { control, reset, handleSubmit } = useForm();
+    const { control, reset, handleSubmit, watch } = useForm({
+        resolver: yupResolver(validationSchema)
+    });
     const {brands, types} = useProducts();
+
+    const watchFile = watch('file',null);
 
     useEffect(() => {
         if (product) reset(product);
     }, [product, reset]);
 
     function handleSubmitData (data: FieldValues) {
-        alert("hai");
+        // alert("hai");
         console.log(data);
     }
 
@@ -52,7 +59,14 @@ export default function ProductForm({product, cancelEdit}: Props) {
                     <AppTextInput control={control} multiline={true} rows={4} name='description' label='Description' />
                 </Grid>
                 <Grid item xs={12}>
-                    <AppDropzone control={control} name='file' />
+                    <Box display='flex' justifyContent='space-between' alignItems='center'>
+                        <AppDropzone control={control} name='file' />
+                        {watchFile ? (
+                            <img src={watchFile.preview} alt="preview" style={{maxHeight: 200}} />
+                        ):(
+                            <img src={product?.pictureUrl} alt={product?.name} style={{maxHeight: 200}} />
+                        )}
+                    </Box>
                 </Grid>
             </Grid>
             <Box display='flex' justifyContent='space-between' sx={{mt: 3}}>
