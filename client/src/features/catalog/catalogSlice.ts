@@ -40,6 +40,7 @@ export const fetchProductsAsync = createAsyncThunk<Product[], void, {state: Root
         }
     }
 )
+
 //AsyncThunk => Outer Function: if it goes to inner block, it thinks that it has been fulfilled
 export const fetchProductAsync = createAsyncThunk<Product, number>(//tipe Product dan number
     'catalog/fetchProductAsync',
@@ -99,6 +100,14 @@ export const catalogSlice = createSlice({
         },
         resetProductParams: (state) =>{
             state.productParams = initParams();
+        },
+        setProduct: (state, action) =>{
+            productsAdapter.upsertOne(state, action.payload);
+            state.productsLoaded = false;
+        },
+        removeProduct: (state, action) =>{
+            productsAdapter.removeOne(state, action.payload);
+            state.productsLoaded = false;
         }
     }, //minimal requirement for creating slice
     extraReducers: (builder => {
@@ -142,4 +151,4 @@ export const catalogSlice = createSlice({
 
 export const productSelectors = productsAdapter.getSelectors((state: RootState) => state.catalog);
 
-export const {setProductParams, resetProductParams, setMetaData, setPageNumber} = catalogSlice.actions;
+export const {setProductParams, resetProductParams, setMetaData, setPageNumber, setProduct, removeProduct} = catalogSlice.actions;

@@ -8,6 +8,10 @@ import useProducts from "../../app/hooks/useProducts";
 import { Product } from "../../app/models/product";
 import {yupResolver} from '@hookform/resolvers/yup';
 import { validationSchema } from "./productValidation";
+import agent from "../../app/api/agent";
+import { useAppDispatch } from "../../app/store/configureStore";
+import { setProduct } from "../catalog/catalogSlice";
+import { LoadingButton } from "@mui/lab";
 
 
 interface Props {
@@ -17,20 +21,37 @@ interface Props {
 
 export default function ProductForm({product, cancelEdit}: Props) {
 
-    const { control, reset, handleSubmit, watch } = useForm({
+    const { control, reset, handleSubmit, watch, formState: {isDirty, isSubmitting} } = useForm({
         resolver: yupResolver(validationSchema)
     });
     const {brands, types} = useProducts();
 
     const watchFile = watch('file',null);
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
-        if (product) reset(product);
-    }, [product, reset]);
+        if (product && !watchFile && !isDirty) reset(product); //only reset the product if the form is not dirty and we don't have the watch file 
+        return () => {
+            if (watchFile) URL.revokeObjectURL(watchFile.preview);
+        }
+    }, [product, reset, watchFile, isDirty]); // jika item di dalam array dependency berubah, maka useEffect akan dipanggil ulang
 
-    function handleSubmitData (data: FieldValues) {
+    async function handleSubmitData (data: FieldValues) {
         // alert("hai");
-        console.log(data);
+        try {
+            let response: Product;
+            if(product){
+                alert ("update product");
+                response = await agent.Admin.updateProduct(data);
+            }else {
+                alert ("create product");
+                response = await agent.Admin.createProduct(data);
+            }
+            dispatch(setProduct(response));
+            cancelEdit();
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     return (
@@ -71,7 +92,7 @@ export default function ProductForm({product, cancelEdit}: Props) {
             </Grid>
             <Box display='flex' justifyContent='space-between' sx={{mt: 3}}>
                 <Button onClick={cancelEdit} variant='contained' color='inherit'>Cancel</Button>
-                <Button type='submit' variant='contained' color='success'>Submit</Button>
+                <LoadingButton loading={isSubmitting} type='submit' variant='contained' color='success'>Submit</LoadingButton>
             </Box>
             </form>
         </Box>
