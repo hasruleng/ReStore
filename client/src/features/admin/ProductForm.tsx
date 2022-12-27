@@ -41,10 +41,10 @@ export default function ProductForm({product, cancelEdit}: Props) {
         try {
             let response: Product;
             if(product){
-                alert ("update product");
+                // alert ("update product");
                 response = await agent.Admin.updateProduct(data);
             }else {
-                alert ("create product");
+                // alert ("create product");
                 response = await agent.Admin.createProduct(data);
             }
             dispatch(setProduct(response));
